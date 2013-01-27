@@ -7,6 +7,7 @@ class NdlStatistic < ActiveRecord::Base
   attr_accessible :term_id
   
   validates_presence_of :term_id
+  validates_uniqueness_of :term_id
   
   def calc_all
     @prev_term_end = Term.where(:id => term_id).first.start_at.yesterday
@@ -116,6 +117,9 @@ class NdlStatistic < ActiveRecord::Base
         )
       end
     end
+  rescue Exception => e
+    p "Failed to manifestation counts: #{e}"
+    logger.error "Failed to calculate manifestation counts: #{e}"
   end
 
   # 2. 受入
@@ -203,6 +207,9 @@ class NdlStatistic < ActiveRecord::Base
         )
       end
     end
+  rescue Exception => e
+    p "Failed to accept counts: #{e}"
+    logger.error "Failed to accept manifestation counts: #{e}"
   end
 
   # 3. 利用
@@ -258,6 +265,9 @@ class NdlStatistic < ActiveRecord::Base
       )
 
     end
+  rescue Exception => e
+    p "Failed to checkout counts: #{e}"
+    logger.error "Failed to calculate checkout counts: #{e}"
   end
 
   # 7. 刊行資料
@@ -279,6 +289,9 @@ class NdlStatistic < ActiveRecord::Base
         )
       end
     end
+  rescue Exception => e
+    p "Failed to create jma_publication list: #{e}"
+    logger.error "Failed to create jma_publication list: #{e}"
   end
 
 end
