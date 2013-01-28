@@ -6,23 +6,43 @@ class NdlStatistic < ActiveRecord::Base
   has_many :ndl_stat_jma_publications, :dependent => :destroy
   attr_accessible :term_id
   
+  term_ids = Term.select(:id).map(&:id)
+  
   validates_presence_of :term_id
   validates_uniqueness_of :term_id
+  validates_inclusion_of :term_id, :in => term_ids
 
-  # NDL 年報用集計
+  # NDL 年報用集計処理
   def calc_all
-    @prev_term_end = Term.where(:id => term_id).first.start_at.yesterday
-    @curr_term_end = Term.where(:id => term_id).first.end_at
+    # duplication check
+    if NdlStatistic.where(:term_id => term_id).exists?
+      p "NDL statistic for #{term_id} is already exists"
+      logger.error "NDL statistic for #{term_id} is already exists"
+      return false
+    end
+    # validates term_id
+    begin
+      @prev_term_end = Term.where(:id => term_id).first.start_at.yesterday
+      @curr_term_end = Term.where(:id => term_id).first.end_at
+    rescue Exception => e
+      p "Failed to get Term object for #{term_id}: #{e}"
+      logger.error "Failed to get Term object for #{term_id}: #{e}"
+      return false
+    end
+    # calculate ndl statistics
     self.calc_manifestation_counts
     self.calc_accept_counts
     self.calc_checkout_counts
     self.aggregate_jma_publications
+  rescue Exception => e
+    p "Failed to calculate ndl statistics: #{e}"
+    logger.error "Failed to calculate ndl statistics: #{e}"
   end
   
   # 1. 所蔵
   def calc_manifestation_counts
     NdlStatistic.transaction do
-      p "ndl_statistics of manifestation_counts"
+      # p "ndl_statistics of manifestation_counts"
       # 書籍、逐次刊行物
       [ "book", "magazine" ].each do |type|
         book_type = (type == 'book') ? ['%book', '%monograph'] : ['%magazine', '%serial_book']
@@ -557,6 +577,9 @@ private
       end
       return excel_filepath
     end
+  rescue Exception => e
+    p "Failed to create ndl report excelxt: #{e}"
+    logger.error "Failed to create ndl report excelx: #{e}"
   end
 
 end
