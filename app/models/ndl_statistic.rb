@@ -14,12 +14,6 @@ class NdlStatistic < ActiveRecord::Base
 
   # NDL 年報用集計処理
   def calc_all
-    # duplication check
-    if NdlStatistic.where(:term_id => term_id).exists?
-      p "NDL statistic for #{term_id} is already exists"
-      logger.error "NDL statistic for #{term_id} is already exists"
-      return false
-    end
     # validates term_id
     begin
       @prev_term_end = Term.where(:id => term_id).first.start_at.yesterday
