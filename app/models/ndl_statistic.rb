@@ -140,7 +140,7 @@ class NdlStatistic < ActiveRecord::Base
   # 2. 受入
   def calc_accept_counts
     NdlStatistic.transaction do
-      p "ndl_statistics of accept_counts"
+      # p "ndl_statistics of accept_counts"
       # 書籍、逐次刊行物
       [ "book", "magazine" ].each do |type|
         book_type = (type == 'book') ? ['%book', '%monograph'] : ['%magazine', '%serial_book']
@@ -230,7 +230,7 @@ class NdlStatistic < ActiveRecord::Base
   # 3. 利用
   def calc_checkout_counts
     NdlStatistic.transaction do
-      p "ndl_statistics of checkout_counts"
+      # p "ndl_statistics of checkout_counts"
       # 書籍、逐次刊行物
       [ "book", "magazine" ].each do |type|
         book_type = (type == 'book') ? ['%book', '%monograph'] : ['%magazine', '%serial_book']
@@ -288,7 +288,7 @@ class NdlStatistic < ActiveRecord::Base
   # 7. 刊行資料
   def aggregate_jma_publications
     NdlStatistic.transaction do
-      p "ndl_statistics of jma_publications"
+      # p "ndl_statistics of jma_publications"
       items = Item.includes(:manifestation, :accept_type).
                    where("accept_types.name = ?", 'jma').
 	           where("manifestations.created_at between ? and ?",
